@@ -1,0 +1,10 @@
+import { writeFileSync } from "fs"
+
+const content = 'Test content!'
+
+try {
+  writeFileSync('./test.txt', content);
+  console.log('Success!');
+} catch (error) {
+  console.error(error);
+}
