@@ -59,3 +59,6 @@ profile*
 
 # Ignore CSV files
 *.csv
+
+# Ignore dist folder
+dist/
