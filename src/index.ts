@@ -5,9 +5,9 @@ import { routes } from './routes/our-first-route';
 
 const app = fastify();
 
-// server.register(fastifyAutoload, {
-//   dir: path.join(__dirname, 'plugins'),
-// });
+app.register(fastifyAutoload, {
+  dir: path.join(__dirname, 'plugins'),
+});
 
 app.listen({ port: 8080}, (error, address) => {
   if (error) {
@@ -22,7 +22,6 @@ app.register(fastifyAutoload, {
   dir: path.join(__dirname, 'routes'),
 })
 
-// app.register(testRoute);
 
 app.register(routes)
 
