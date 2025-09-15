@@ -62,3 +62,6 @@ profile*
 
 # Ignore dist folder
 dist/
+
+# Ignore secrets
+.env
