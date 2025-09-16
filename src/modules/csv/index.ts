@@ -1,6 +1,6 @@
-import { writeFileSync } from "fs"
+import { writeFileSync } from 'fs';
 
-const content = 'Test content!'
+const content = 'Test content!';
 
 try {
   writeFileSync('./test.txt', content);

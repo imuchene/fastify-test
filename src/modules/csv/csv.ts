@@ -1,12 +1,13 @@
-import { appendFileSync } from "fs";
-import { createInterface } from "readline";
+import { appendFileSync } from 'fs';
+import { createInterface } from 'readline';
 
 const readLine = createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-const readLineAsync = (message: string) => new Promise<string>((resolve) => readLine.question(message, resolve));
+const readLineAsync = (message: string) =>
+  new Promise<string>((resolve) => readLine.question(message, resolve));
 
 class Person {
   protected name: string;
@@ -34,9 +35,9 @@ const startApp = async () => {
   {
     let shouldContinue = true;
     while (shouldContinue) {
-      const name = await readLineAsync('Contact Name: ')
-      const number = await readLineAsync('Contact Number: ')
-      const email = await readLineAsync('Contact Email: ')
+      const name = await readLineAsync('Contact Name: ');
+      const number = await readLineAsync('Contact Number: ');
+      const email = await readLineAsync('Contact Email: ');
 
       const person = new Person(name, number, email);
       person.saveToCSV();
@@ -47,6 +48,6 @@ const startApp = async () => {
 
     readLine.close();
   }
-}
+};
 
 startApp();

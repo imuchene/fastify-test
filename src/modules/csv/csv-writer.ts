@@ -1,5 +1,5 @@
 import { createObjectCsvWriter } from 'csv-writer';
-import prompt, { Schema } from 'prompt'
+import prompt, { Schema } from 'prompt';
 
 prompt.start();
 prompt.message = '';
@@ -11,8 +11,8 @@ const csvWriter = createObjectCsvWriter({
     { id: 'name', title: 'NAME' },
     { id: 'number', title: 'NUMBER' },
     { id: 'email', title: 'EMAIL' },
-    { id: 'createdAt', title: 'CREATED AT' }
-  ]
+    { id: 'createdAt', title: 'CREATED AT' },
+  ],
 });
 
 class Person {
@@ -21,7 +21,7 @@ class Person {
   protected email: string;
   protected createdAt: string;
 
-  constructor(name: string = '', number: string = '', email: string = '') {
+  constructor(name = '', number = '', email = '') {
     this.name = name;
     this.number = number;
     this.email = email;
@@ -33,7 +33,7 @@ class Person {
       const { name, number, email, createdAt } = this;
 
       await csvWriter.writeRecords([{ name, number, email, createdAt }]);
-      console.log(`${name} Saved!`)
+      console.log(`${name} Saved!`);
     } catch (error) {
       console.error('Error saving contact:', error);
     }
@@ -58,22 +58,25 @@ const startApp = async () => {
         type: 'string',
         pattern: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/,
         required: true,
-        description: 'Contact Email'
-      }
-    }
-  }
-
+        description: 'Contact Email',
+      },
+    },
+  };
 
   const responses = await prompt.get(questions);
 
-  const person = new Person(responses.name?.toString(), responses.number?.toString(), responses.email?.toString());
+  const person = new Person(
+    responses.name?.toString(),
+    responses.number?.toString(),
+    responses.email?.toString(),
+  );
   await person.saveToCSV();
 
-  const { again } = await prompt.get([{ name: 'again', description: 'Continue? [y to continue]' }])
+  const { again } = await prompt.get([
+    { name: 'again', description: 'Continue? [y to continue]' },
+  ]);
 
   if (again?.toString().toLowerCase() === 'y') await startApp();
-
-}
+};
 
 startApp();
-

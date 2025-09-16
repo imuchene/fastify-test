@@ -12,19 +12,21 @@ app.register(fastifyAutoload, {
   dir: path.join(__dirname, 'plugins'),
 });
 
-app.listen({ port: Number(process.env.PORT)}, (error: Error | null, address: string) => {
-  if (error) {
-    console.error(error);
-    process.exit(1)
-  }
+app.listen(
+  { port: Number(process.env.PORT) },
+  (error: Error | null, address: string) => {
+    if (error) {
+      console.error(error);
+      process.exit(1);
+    }
 
-  console.log(`Server listening at ${address}`)
-})
+    console.log(`Server listening at ${address}`);
+  },
+);
 
 app.register(fastifyAutoload, {
   dir: path.join(__dirname, 'routes'),
-})
-
+});
 
 app.register(routes);
 
@@ -36,9 +38,8 @@ app.register(fastifyView, {
 });
 
 app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-  return reply.viewAsync('views/index.ejs', { name: `What's Fare is Fair!`})
-})
-
+  return reply.viewAsync('views/index.ejs', { name: `What's Fare is Fair!` });
+});
 
 app.get('/ping', async () => {
   return 'pong \n';
