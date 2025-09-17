@@ -5,6 +5,7 @@ import { routes } from './routes/our-first-route';
 import fastifyView from '@fastify/view';
 import ejs from 'ejs';
 import '@dotenvx/dotenvx/config';
+import fastifyStatic from '@fastify/static';
 
 const app = fastify();
 
@@ -35,6 +36,17 @@ app.register(fastifyView, {
     ejs: ejs,
   },
   root: __dirname,
+});
+
+app.register(fastifyStatic, {
+  root: path.join(__dirname, 'public'),
+  prefix: '/public/',
+});
+
+app.register(fastifyStatic, {
+  root: path.join(process.cwd(), 'node_modules/simpledotcss'),
+  prefix: '/simpledotcss/',
+  decorateReply: false,
 });
 
 app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
