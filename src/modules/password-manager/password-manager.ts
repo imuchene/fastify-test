@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import promptModule, { Prompt } from 'prompt-sync';
 
 interface MockDB {
-  passwords: object;
+  passwords: any;
   hash: string;
 }
 
@@ -12,6 +12,11 @@ export class PasswordManager {
     passwords: {},
     hash: '',
   };
+
+  constructor(){
+    if (!this.mockDb.hash) this.promptNewPassword();
+    else this.promptOldPassword()
+  }
 
   saveNewPassword(password: string) {
     this.mockDb.hash = bcrypt.hashSync(password, 10);
@@ -28,7 +33,7 @@ export class PasswordManager {
     return this.saveNewPassword(response);
   }
 
-  async promptOldPassword() {
+  async promptOldPassword(): Promise<void> {
     let verified = false;
     while (!verified) {
       const response = this.prompt('Enter your password: ');
@@ -44,7 +49,7 @@ export class PasswordManager {
     }
   }
 
-  async showMenu() {
+  async showMenu(): Promise<void> {
     console.log(`
       1. View passwords
       2. Manage new password
@@ -75,7 +80,21 @@ export class PasswordManager {
     }
   }
 
-  viewPasswords() {}
+  viewPasswords() {
+    const { passwords } = this.mockDb;
+    Object.entries(passwords).forEach(([key, value], index) => { console.log(`${index + 1 }. ${key} => ${value}`)});
+    this.showMenu()
+  }
 
-  promptManageNewPassword() {}
+  promptManageNewPassword() {
+    const source = this.prompt('Enter name for password: ');
+    const password = this.prompt('Enter password to save: ');
+
+    this.mockDb.passwords[source] = password;
+    console.log(`Password for ${source} has been saved!`);
+    this.showMenu();
+  }
+
 }
+
+new PasswordManager();
