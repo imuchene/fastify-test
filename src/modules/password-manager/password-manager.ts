@@ -1,36 +1,62 @@
 import bcrypt from 'bcrypt';
 import promptModule, { Prompt } from 'prompt-sync';
-
-interface MockDB {
-  passwords: any;
-  hash: string;
-}
-
+import { Collection, Document, MongoClient } from 'mongodb';
+import '@dotenvx/dotenvx/config';
 export class PasswordManager {
   prompt: Prompt = promptModule();
-  mockDb: MockDB = {
-    passwords: {},
-    hash: '',
-  };
 
-  constructor(){
-    if (!this.mockDb.hash) this.promptNewPassword();
-    else this.promptOldPassword()
+  dbUrl = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/?authSource=admin&authMechanism=DEFAULT`;
+  client: MongoClient = new MongoClient(this.dbUrl);
+  hasPasswords = false;
+  passwordsCollection: Collection<Document>;
+  authCollection: Collection<Document>;
+  dbName = String(process.env.MONGO_DATABASE);
+
+  constructor() {
+    this.main();
   }
 
-  saveNewPassword(password: string) {
-    this.mockDb.hash = bcrypt.hashSync(password, 10);
+  async main() {
+    await this.initializeMongoDb();
+    if (!this.hasPasswords) this.promptNewPassword();
+    else this.promptOldPassword();
+  }
+
+  async initializeMongoDb() {
+    try {
+      await this.client.connect();
+      console.log('Connected successfully to server');
+      const db = this.client.db(this.dbName);
+      this.authCollection = db.collection('auth');
+      this.passwordsCollection = db.collection('passwords');
+      const hashedPassword = await this.authCollection.findOne({
+        type: 'auth',
+      });
+      this.hasPasswords = !!hashedPassword;
+    } catch (error) {
+      console.error('Error connecting to the database:', error);
+      process.exit(1);
+    }
+  }
+
+  async saveNewPassword(password: string) {
+    const hash = bcrypt.hashSync(password, 10);
+    await this.authCollection.insertOne({ type: 'auth', hash });
     console.log('Password has been saved');
     this.showMenu();
   }
 
   async compareHashedPassword(password: string): Promise<boolean> {
-    return await bcrypt.compare(password, this.mockDb.hash);
+    const result = await this.authCollection.findOne({ type: 'auth' });
+    if (result) {
+      return await bcrypt.compare(password, result.hash);
+    }
+    return new Promise(() => false);
   }
 
-  promptNewPassword() {
+  async promptNewPassword() {
     const response = this.prompt('Enter a main password: ');
-    return this.saveNewPassword(response);
+    return await this.saveNewPassword(response);
   }
 
   async promptOldPassword(): Promise<void> {
@@ -60,41 +86,47 @@ export class PasswordManager {
 
     switch (response) {
       case '1':
-        this.viewPasswords();
+        await this.viewPasswords();
         break;
 
       case '2':
-        this.promptManageNewPassword();
+        await this.promptManageNewPassword();
         break;
 
       case '3':
-        this.promptOldPassword();
+        await this.promptOldPassword();
         break;
 
       case '4':
-        break;
+        process.exit();
+       
 
       default:
         console.log(`That's an invalid response`);
-        break;
+        process.exit();
     }
   }
 
-  viewPasswords() {
-    const { passwords } = this.mockDb;
-    Object.entries(passwords).forEach(([key, value], index) => { console.log(`${index + 1 }. ${key} => ${value}`)});
-    this.showMenu()
-  }
-
-  promptManageNewPassword() {
-    const source = this.prompt('Enter name for password: ');
-    const password = this.prompt('Enter password to save: ');
-
-    this.mockDb.passwords[source] = password;
-    console.log(`Password for ${source} has been saved!`);
+  async viewPasswords() {
+    const passwords = await this.passwordsCollection.find({}).toArray();
+    passwords.forEach(({ source, password }, index) => {
+      console.log(`${index + 1}. ${source} => ${password}`);
+    });
     this.showMenu();
   }
 
+  async promptManageNewPassword() {
+    const source = this.prompt('Enter name for password: ');
+    const password = this.prompt('Enter password to save: ');
+
+    await this.passwordsCollection.findOneAndUpdate(
+      { source },
+      { $set: { password } },
+      { returnDocument: 'after', upsert: true },
+    );
+    console.log(`Password for ${source} has been saved!`);
+    this.showMenu();
+  }
 }
 
 new PasswordManager();
