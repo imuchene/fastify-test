@@ -1,7 +1,7 @@
 {
   "name": "fastify-test",
   "version": "1.0.0",
-  "description": "This project was bootstrapped with Fastify-CLI.",
+  "description": "This project was bootstrapped with Fastify-CLI",
   "main": "index.js",
   "types": "index.d.ts",
   "directories": {
@@ -34,6 +34,7 @@
     "mongodb": "^6.20.0",
     "prompt": "^1.3.0",
     "prompt-sync": "^4.2.0",
+    "rss-parser": "^3.13.0",
     "simpledotcss": "^2.3.7"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import promptModule, { Prompt } from 'prompt-sync';
 import { Collection, Document, MongoClient } from 'mongodb';
 import '@dotenvx/dotenvx/config';
+
 export class PasswordManager {
   prompt: Prompt = promptModule();
 
@@ -22,7 +23,7 @@ export class PasswordManager {
     else this.promptOldPassword();
   }
 
-  async initializeMongoDb() {
+  async initializeMongoDb(): Promise<void> {
     try {
       await this.client.connect();
       console.log('Connected successfully to server');
@@ -39,7 +40,7 @@ export class PasswordManager {
     }
   }
 
-  async saveNewPassword(password: string) {
+  async saveNewPassword(password: string): Promise<void> {
     const hash = bcrypt.hashSync(password, 10);
     await this.authCollection.insertOne({ type: 'auth', hash });
     console.log('Password has been saved');
@@ -99,11 +100,10 @@ export class PasswordManager {
 
       case '4':
         process.exit();
-       
 
       default:
         console.log(`That's an invalid response`);
-        process.exit();
+        await this.showMenu();
     }
   }
 
