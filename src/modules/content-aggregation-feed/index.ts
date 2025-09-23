@@ -4,8 +4,11 @@ const parser = new Parser();
 
 async function main(){
   const url = 'https://www.bonappetit.com/feed/recipes-rss-feed/rss';
-  const response = await fetch(url);
-  console.log('response', await response.text());
+  const { title, items } = await parser.parseURL(url);
+  console.log('title', title);
+
+  const results = items.map(({title, link}) => ({ title, link }));
+  console.table(results);
 }
 
 main();
