@@ -1,11 +1,13 @@
 import fastifyAutoload from '@fastify/autoload';
 import fastify, { FastifyReply, FastifyRequest } from 'fastify';
 import path from 'path';
-import { routes } from './routes/our-first-route';
+import { restaurantRoutes } from './routes/restaurant';
 import fastifyView from '@fastify/view';
 import ejs from 'ejs';
 import '@dotenvx/dotenvx/config';
 import fastifyStatic from '@fastify/static';
+import fastifyFormbody from '@fastify/formbody';
+import { libraryRoutes } from './routes/library';
 
 const app = fastify();
 
@@ -29,7 +31,9 @@ app.register(fastifyAutoload, {
   dir: path.join(__dirname, 'routes'),
 });
 
-app.register(routes);
+// Routes
+app.register(restaurantRoutes);
+app.register(libraryRoutes);
 
 app.register(fastifyView, {
   engine: {
@@ -43,12 +47,15 @@ app.register(fastifyStatic, {
   prefix: '/public/',
 });
 
+app.register(fastifyFormbody);
+
 app.register(fastifyStatic, {
   root: path.join(process.cwd(), 'node_modules/simpledotcss'),
   prefix: '/simpledotcss/',
   decorateReply: false,
 });
 
+// Root route
 app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
   return reply.viewAsync('views/index.ejs', { name: `What's Fare is Fair!` });
 });
