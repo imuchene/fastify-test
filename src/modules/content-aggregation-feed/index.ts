@@ -17,14 +17,13 @@ async function main() {
 }
 
 function aggregate(responses: any, feedItems: any[]) {
-  responses.forEach(({ items }: any) => {
-    items.forEach(({ title, link }: any) => {
+  for (const { items } of responses) {
+    for (const { title, link } of items) {
       if (title.toLowerCase().includes('chicken')) {
         feedItems.push({ title, link });
       }
-    });
-  });
-
+    }
+  }
   return feedItems;
 }
 
