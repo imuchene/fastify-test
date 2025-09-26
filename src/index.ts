@@ -1,13 +1,13 @@
 import fastifyAutoload from '@fastify/autoload';
 import fastify, { FastifyReply, FastifyRequest } from 'fastify';
 import path from 'path';
-import { restaurantRoutes } from './routes/restaurant';
 import fastifyView from '@fastify/view';
 import ejs from 'ejs';
 import '@dotenvx/dotenvx/config';
 import fastifyStatic from '@fastify/static';
 import fastifyFormbody from '@fastify/formbody';
-import { libraryRoutes } from './routes/library';
+import { routes } from './routes/router';
+import { restaurantRoutes } from './routes/restaurant.router';
 
 const app = fastify();
 
@@ -30,10 +30,6 @@ app.listen(
 app.register(fastifyAutoload, {
   dir: path.join(__dirname, 'routes'),
 });
-
-// Routes
-app.register(restaurantRoutes);
-app.register(libraryRoutes);
 
 app.register(fastifyView, {
   engine: {
@@ -63,3 +59,8 @@ app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
 app.get('/ping', async () => {
   return 'pong \n';
 });
+
+// Routes
+app.register(restaurantRoutes);
+
+app.register(routes, { prefix: 'api' });

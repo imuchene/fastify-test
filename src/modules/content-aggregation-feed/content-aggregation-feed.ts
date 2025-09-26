@@ -3,6 +3,11 @@ import promptModule from 'prompt-sync';
 
 const parser = new Parser();
 
+interface FeedType {
+  title: string | undefined;
+  link: string | undefined;
+}
+
 const urls = [
   'https://www.bonappetit.com/feed/recipes-rss-feed/rss',
   'https://www.budgetbytes.com/category/recipes/feed/',
@@ -10,10 +15,10 @@ const urls = [
 ];
 
 const prompt = promptModule({ sigint: true });
-const customItems: any = [];
+const customItems: FeedType[] = [];
 
 async function main() {
-  const feedItems: any[] = [];
+  const feedItems: FeedType[] = [];
   const awaitableRequests = urls.map((url) => parser.parseURL(url));
   const responses = await Promise.all(awaitableRequests);
 
@@ -21,7 +26,7 @@ async function main() {
   print(feedItems);
 }
 
-function aggregate(responses: any, feedItems: any[]) {
+function aggregate(responses: any, feedItems: FeedType[]) {
   for (const { items } of responses) {
     for (const { title, link } of items) {
       if (title.toLowerCase().includes('chicken')) {
@@ -32,7 +37,7 @@ function aggregate(responses: any, feedItems: any[]) {
   return feedItems;
 }
 
-function print(feedItems: any[]) {
+function print(feedItems: FeedType[]) {
   const res = prompt('Add item: ');
   const [title, link] = res.split(',');
   if (![title, link].includes(undefined)) customItems.push({ title, link });

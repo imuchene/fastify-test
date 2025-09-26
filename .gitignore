@@ -65,3 +65,6 @@ dist/
 
 # Ignore secrets
 .env
+
+# Ignore .sqlite files
+*.sqlite
