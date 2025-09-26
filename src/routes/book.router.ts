@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { Book } from '../models/book.model';
+import { Book } from '../interfaces/book.interface';
 import { HttpError } from '@fastify/sensible';
 
 export async function bookRoutes(fastify: FastifyInstance) {
