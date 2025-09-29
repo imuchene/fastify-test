@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Book } from '../interfaces/book.interface';
 import { HttpError } from '@fastify/sensible';
+import { Book as BookModel } from '../models/book.model';
 
 export async function bookRoutes(fastify: FastifyInstance) {
   // Create one book
@@ -9,7 +10,7 @@ export async function bookRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Body: Book }>, reply: FastifyReply) => {
       const { title, author } = request.body;
       try {
-        const book = { title, author };
+        const book = await BookModel.create({ title, author });
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {
@@ -30,8 +31,9 @@ export async function bookRoutes(fastify: FastifyInstance) {
     '/:id',
     async (request: FastifyRequest<{ Params: Book }>, reply: FastifyReply) => {
       const { id } = request.params;
+
       try {
-        const book = { id };
+        const book = await BookModel.findByPk(id);
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {
@@ -45,10 +47,17 @@ export async function bookRoutes(fastify: FastifyInstance) {
   // Update one book
   fastify.put(
     '/:id',
-    async (request: FastifyRequest<{ Params: Book }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: Book; Body: Book }>,
+      reply: FastifyReply,
+    ) => {
       const { id } = request.params;
+      const { title, author } = request.body;
       try {
-        const book = { id };
+        const book = await BookModel.update(
+          { title, author },
+          { where: { id } },
+        );
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {
@@ -65,7 +74,7 @@ export async function bookRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Params: Book }>, reply: FastifyReply) => {
       const { id } = request.params;
       try {
-        const book = { id };
+        const book = await BookModel.destroy({ where: { id } });
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {
