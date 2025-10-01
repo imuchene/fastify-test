@@ -5,6 +5,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "strictPropertyInitialization": false,
+    "target": "ES2021", //this option assists when using the 'Model' syntax in Sequelize
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module

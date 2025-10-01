@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { Book } from '../interfaces/book.interface';
 import { HttpError } from '@fastify/sensible';
-import { Book as BookModel } from '../models/book.model';
+import { Book } from '../models/book.model';
 
 export async function bookRoutes(fastify: FastifyInstance) {
   // Create one book
@@ -10,7 +9,16 @@ export async function bookRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Body: Book }>, reply: FastifyReply) => {
       const { title, author } = request.body;
       try {
-        const book = await BookModel.create({ title, author });
+        let book: Book | null;
+        book = await Book.findOne({ where: { title } });
+
+        if (book) {
+          book.count += 1;
+          book.save();
+        } else {
+          book = await Book.create({ title, author, count: 1 });
+        }
+
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {
@@ -23,7 +31,8 @@ export async function bookRoutes(fastify: FastifyInstance) {
 
   // Get all books
   fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-    return reply.send({ message: 'ok' });
+    const books = await Book.findAll();
+    return reply.send(books);
   });
 
   // Get one book
@@ -33,7 +42,7 @@ export async function bookRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
 
       try {
-        const book = await BookModel.findByPk(id);
+        const book = await Book.findByPk(id);
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {
@@ -54,10 +63,7 @@ export async function bookRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
       const { title, author } = request.body;
       try {
-        const book = await BookModel.update(
-          { title, author },
-          { where: { id } },
-        );
+        const book = await Book.update({ title, author }, { where: { id } });
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {
@@ -74,7 +80,7 @@ export async function bookRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Params: Book }>, reply: FastifyReply) => {
       const { id } = request.params;
       try {
-        const book = await BookModel.destroy({ where: { id } });
+        const book = await Book.destroy({ where: { id } });
         reply.send(book);
       } catch (error: unknown) {
         if (error instanceof HttpError) {

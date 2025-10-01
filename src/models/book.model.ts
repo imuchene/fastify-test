@@ -1,9 +1,20 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import { db } from '../db/database.config';
 
-export const Book = db.define(
-  'Book',
+export class Book extends Model {
+  declare id: number;
+  declare title: string;
+  declare author: string;
+  declare count: number;
+}
+
+Book.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     title: {
       type: DataTypes.STRING,
       unique: true,
@@ -16,7 +27,14 @@ export const Book = db.define(
       defaultValue: 0,
     },
   },
-  { tableName: 'books', timestamps: true },
+  {
+    sequelize: db,
+    modelName: 'Book',
+    tableName: 'books',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
 );
 
-db.sync();
+Book.sync();
