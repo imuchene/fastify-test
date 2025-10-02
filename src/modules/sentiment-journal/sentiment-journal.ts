@@ -1,20 +1,18 @@
 import SpellChecker from 'spellchecker';
-import natural from 'natural';
-import { removeStopwords } from 'stopword'
+import natural, { PorterStemmer, SentimentAnalyzer } from 'natural';
 
-const inputString: string = 'I am feeelinng grea!';
-const tokenizer = new natural.WordTokenizer()
+const inputString = 'I am feeelinng bad!';
+const tokenizer = new natural.WordTokenizer();
 
-function correctSpelling(inputString: string ){
+function correctSpelling(inputString: string) {
   const words = inputString.split(' ');
   const corrections = [];
 
   for (const word of words) {
     if (SpellChecker.isMisspelled(word)) {
       const options = SpellChecker.getCorrectionsForMisspelling(word);
-      corrections.push(options[0])
-    }
-    else {
+      corrections.push(options[0]);
+    } else {
       corrections.push(word);
     }
   }
@@ -22,26 +20,15 @@ function correctSpelling(inputString: string ){
   return corrections.join(' ');
 }
 
-function tokenizeInput(inputString: string){
+function tokenizeInput(inputString: string) {
   return tokenizer.tokenize(inputString);
 }
 
-function stemWords(tokens:Array<any>) {
-  const stems = [];
-  for (const token of tokens) {
-    const stem = natural.PorterStemmer.stem(token);
-    stems.push(stem);
-  }
+const analyzer = new SentimentAnalyzer('English', PorterStemmer, 'afinn');
 
-  return stems;
-}
-
-const correctedSpelling = (correctSpelling(inputString));
+const correctedSpelling = correctSpelling(inputString);
 const tokens = tokenizeInput(correctedSpelling);
-const stems = stemWords(tokens);
-const removedStopwords = removeStopwords(stems);
+const sentimentResults = analyzer.getSentiment(tokens);
 
 console.log('tokens', tokens);
-console.log('stems', stems);
-console.log('removedStopwords', removedStopwords);
-
+console.log('sentiment results', sentimentResults);
