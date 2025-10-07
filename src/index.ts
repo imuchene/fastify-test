@@ -8,6 +8,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyFormbody from '@fastify/formbody';
 import { routes } from './routes/router';
 import { restaurantRoutes } from './routes/restaurant.router';
+import { emailRoutes } from './routes/email.router';
 
 const app = fastify();
 
@@ -62,5 +63,6 @@ app.get('/ping', async () => {
 
 // Routes
 app.register(restaurantRoutes);
+app.register(emailRoutes);
 
 app.register(routes, { prefix: 'api' });

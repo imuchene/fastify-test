@@ -10,22 +10,14 @@ const transporter = createTransport({
   },
 });
 
-const html = 
-`<html>
-  <body>
-    <h1>Confirm your email</h1>
-  </body>
-</html>
-`
+export async function sendMail(to: string, html: string) {
+  const mailOptions: SendMailOptions = {
+    from: 'noreply@innbox.example.com',
+    to,
+    subject: 'Email from Inn Box!',
+    html,
+  };
 
-const mailOptions: SendMailOptions = {
-  from: 'izo@innbox.example.com',
-  to: 'imuchene@msn.com',
-  subject: 'Welcome to Inn Box!',
-  html: html,
-};
-
-async function sendMail() {
   try {
     const info = await transporter.sendMail(mailOptions);
     console.log(`Email sent: ${info.response}`);
@@ -35,5 +27,3 @@ async function sendMail() {
     }
   }
 }
-
-sendMail();
