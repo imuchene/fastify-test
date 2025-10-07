@@ -10,11 +10,19 @@ const transporter = createTransport({
   },
 });
 
+const html = 
+`<html>
+  <body>
+    <h1>Confirm your email</h1>
+  </body>
+</html>
+`
+
 const mailOptions: SendMailOptions = {
   from: 'izo@innbox.example.com',
   to: 'imuchene@msn.com',
   subject: 'Welcome to Inn Box!',
-  text: 'Confirm your email',
+  html: html,
 };
 
 async function sendMail() {
