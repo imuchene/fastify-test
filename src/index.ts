@@ -9,12 +9,19 @@ import fastifyFormbody from '@fastify/formbody';
 import { routes } from './routes/router';
 import { restaurantRoutes } from './routes/restaurant.router';
 import { emailRoutes } from './routes/email.router';
+import { sendMail } from './services/mailer';
+import { campaignMail } from './templates/mail-template';
 
 const app = fastify();
 
 app.register(fastifyAutoload, {
   dir: path.join(__dirname, 'plugins'),
 });
+
+sendMail(
+  'izo@example.com',
+  campaignMail('Special Promotion', 'promo1', 'izo@example.com'),
+);
 
 app.listen(
   { port: Number(process.env.PORT) },

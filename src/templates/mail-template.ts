@@ -12,3 +12,20 @@ export function welcomeMail() {
   const content = `<html>Welcome to Inn Box!</html>`;
   return htmlTemplate(content);
 }
+
+export function confirmationMail(url: string) {
+  const content = `<a href="${url}"><h1>Confirm your email</h1></a>`;
+  return htmlTemplate(content);
+}
+
+export function campaignMail(
+  campaignText: string,
+  campaignKey: string,
+  email: string,
+) {
+  const content = `
+  <h1>${campaignText}</h1>
+    <img src="http://localhost:3000/campaign/${campaignKey}/user/${email}/image.png" style="display:none" />
+  `;
+  return htmlTemplate(content);
+}

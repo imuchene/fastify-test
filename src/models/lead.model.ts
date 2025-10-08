@@ -5,6 +5,7 @@ export class Lead extends Model {
   declare email: string;
   declare verified: boolean;
   declare last_campaign: string;
+  declare campaignKey: string;
 }
 
 Lead.init(
