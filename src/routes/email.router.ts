@@ -9,7 +9,7 @@ export async function emailRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Body: Lead }>, reply: FastifyReply) => {
       try {
         const { email } = request.body;
-        await Lead.create({ email });
+        await Lead.create({ email, subscribe_to_emails: true });
 
         const host = request.headers.host;
         const protocol = request.protocol;
@@ -55,6 +55,50 @@ export async function emailRoutes(fastify: FastifyInstance) {
           lead.last_campaign = campaignKey;
           await lead.save();
           console.log(`${email} opened ${campaignKey}`);
+          reply.send({ message: 'ok' });
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('An error occurred', error.message);
+          reply.status(422).send({ message: 'Unable to process the request' });
+        }
+      }
+    },
+  );
+
+  fastify.get(
+    '/unsubscribe/:email',
+    async (request: FastifyRequest<{ Params: Lead }>, reply: FastifyReply) => {
+      const { email } = request.params;
+      try {
+        const lead = await Lead.findOne({ where: { email } });
+        if (lead) {
+          lead.subscribe_to_emails = false;
+          await lead.save();
+          console.log(
+            `${email} has successfully unsubscribed from receiving emails`,
+          );
+          reply.send({ message: 'ok' });
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('An error occurred', error.message);
+          reply.status(422).send({ message: 'Unable to process the request' });
+        }
+      }
+    },
+  );
+
+  fastify.get(
+    '/click/:campaignKey/user/:email',
+    async (request: FastifyRequest<{ Params: Lead }>, reply: FastifyReply) => {
+      const { campaignKey, email } = request.params;
+      try {
+        const lead = await Lead.findOne({ where: { email } });
+        if (lead) {
+          lead.last_clicked_campaign = campaignKey;
+          await lead.save();
+          console.log(`${email} has clicked campaign ${campaignKey}`);
           reply.send({ message: 'ok' });
         }
       } catch (error: unknown) {

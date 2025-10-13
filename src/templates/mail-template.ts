@@ -26,6 +26,7 @@ export function campaignMail(
   const content = `
   <h1>${campaignText}</h1>
     <img src="http://localhost:3000/campaign/${campaignKey}/user/${email}/image.png" style="display:none" />
+    <a href="http://localhost:3000/click/${campaignKey}/user/${email}">Testing</a>
   `;
   return htmlTemplate(content);
 }

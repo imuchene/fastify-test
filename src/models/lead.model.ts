@@ -6,6 +6,8 @@ export class Lead extends Model {
   declare verified: boolean;
   declare last_campaign: string;
   declare campaignKey: string;
+  declare subscribe_to_emails: boolean;
+  declare last_clicked_campaign: string;
 }
 
 Lead.init(
@@ -24,6 +26,13 @@ Lead.init(
     last_campaign: {
       type: DataTypes.STRING,
     },
+    subscribe_to_emails: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    last_clicked_campaign: {
+      type: DataTypes.STRING,
+    },
   },
   {
     sequelize: db,
@@ -35,4 +44,4 @@ Lead.init(
   },
 );
 
-Lead.sync();
+Lead.sync({ alter: true });
