@@ -9,9 +9,11 @@ async function fetchFromMedium() {
     const text = await response.text();
 
     const $ = load(text);
-    const elements = $('article h2');
+    const elements = $('article');
     elements.each((i, element) => {
-      console.log($(element).text())
+      const title = $(element).find('h2').text();
+      const url = $(element).find('a').attr('href');
+      console.log(title, url)
     });
   } catch (error) {
     if (error instanceof HttpError) {
