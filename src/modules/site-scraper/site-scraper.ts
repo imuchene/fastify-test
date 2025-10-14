@@ -1,25 +1,30 @@
-import { HttpError } from '@fastify/sensible';
-import { load } from 'cheerio';
+import puppeteer, { KnownDevices } from 'puppeteer';
 
 async function fetchFromMedium() {
   const url = 'https://medium.com/tag/nodejs';
 
-  try {
-    const response = await fetch(url);
-    const text = await response.text();
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
 
-    const $ = load(text);
-    const elements = $('article');
-    elements.each((i, element) => {
-      const title = $(element).find('h2').text();
-      const url = $(element).find('a').attr('href');
-      console.log(title, url)
-    });
-  } catch (error) {
-    if (error instanceof HttpError) {
-      console.error('error', error.message);
+  await page.emulate(KnownDevices.iPad);
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  await page.waitForNetworkIdle({ idleTime: 3000 });
+
+  const articles = await page.$$('article');
+
+  for (const el of articles) {
+    const title = await el
+      .$eval('h2', (el) => el.textContent.trim())
+      .catch(() => null);
+    const url = await el.$eval('a', (el) => el.href).catch(() => null);
+
+    if (title && url) {
+      console.log(title, url);
     }
   }
+
+  await browser.close();
 }
 
 fetchFromMedium();
