@@ -4,7 +4,7 @@ import menuItems from '../modules/data/menu-items';
 
 export async function restaurantRoutes(fastify: FastifyInstance) {
   fastify.get('/menu', async (request: FastifyRequest, reply: FastifyReply) => {
-    return reply.view('views/menu.ejs', { menuItems });
+    return reply.view('views/restaurant/menu.ejs', { menuItems });
   });
 
   fastify.get(
@@ -22,14 +22,18 @@ export async function restaurantRoutes(fastify: FastifyInstance) {
 
       const today = days[new Date().getDay() - 1];
 
-      return reply.view('views/hours.ejs', { operatingHours, days, today });
+      return reply.view('views/restaurant/hours.ejs', {
+        operatingHours,
+        days,
+        today,
+      });
     },
   );
 
   fastify.get(
     '/about',
     async (request: FastifyRequest, reply: FastifyReply) => {
-      return reply.view('views/about.ejs');
+      return reply.view('views/restaurant/about.ejs');
     },
   );
 }

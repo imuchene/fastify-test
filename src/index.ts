@@ -10,6 +10,7 @@ import { routes } from './routes/router';
 import { restaurantRoutes } from './routes/restaurant.router';
 import { emailRoutes } from './routes/email.router';
 import { schedule } from './services/scheduler';
+import handlebars from 'handlebars';
 
 const app = fastify();
 
@@ -38,7 +39,8 @@ app.register(fastifyAutoload, {
 
 app.register(fastifyView, {
   engine: {
-    ejs: ejs,
+    ejs,
+    handlebars,
   },
   root: __dirname,
 });
@@ -58,7 +60,9 @@ app.register(fastifyStatic, {
 
 // Root route
 app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-  return reply.viewAsync('views/index.ejs', { name: `What's Fare is Fair!` });
+  return reply.viewAsync('views/restaurant/index.ejs', {
+    name: `What's Fare is Fair!`,
+  });
 });
 
 app.get('/ping', async () => {
