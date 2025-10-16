@@ -1,10 +1,44 @@
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Journey Doc Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </head>
-  <body>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Journey Doc Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+</head>
+
+<body class="container">
+  <div class="col-sm-6 mb3 mb-sm-0">
+      <div class="p-3 m-0 border-0 bd-example m-0 border-0">
+      <form method="POST" action="{{route}}">
+    <h2>{{title}}</h2>
+    <div class="mb-4">
+       <label class="form-label" for="usernameInput">Username</label>
+      <input type="text" name="username" id="usernameInput" class="form-control" />
+    </div>
+    <div class="mb-4">
+            <label class="form-label" for="passwordInput">Password</label>
+      <input type="password" name="password" id="passwordInput" class="form-control" />
+    </div>
+    {{#if showExtraFields }}
+    <div class="mb-4">
+        <label class="form-label" for="confirmPasswordInput">Confirm Password</label>
+      <input type="password" name="confirmPassword" id="confirmPasswordInput" class="form-control" />
+    </div>
+    {{/if}}
+    <div class="row mb-4">
+      <div class="col">
+        {{message}} <a href="/auth?page={{switchPage}}">Click here</a>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block mb-4">{{title}}</button>
+  </form>
+  </div>
+  </div>
+</body>
+
 </html>
