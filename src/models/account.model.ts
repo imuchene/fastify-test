@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import { db } from '../db/database.config';
 import crypto from 'node:crypto';
+import { Strategy as LocalStrategy, VerifyFunction } from 'passport-local';
 
 export class Account extends Model {
   declare username: string;
@@ -34,6 +35,12 @@ export class Account extends Model {
       const hashRaw = crypto.pbkdf2Sync(password, salt, 12000, 64, 'sha512');
       this.set('hash', Buffer.from(hashRaw).toString('hex'));
       this.set('salt', salt);
+
+      const test = crypto
+        .createHmac('sha256', 'testKey')
+        .update('testString')
+        .digest('hex');
+      console.log('test hex', test);
     } catch (error) {
       if (error && error instanceof Error) {
         throw new Error(error.message);
@@ -54,7 +61,7 @@ export class Account extends Model {
     return currentHash === hash;
   }
 
-  static passportAuthenticate(): CallableFunction {
+  static passportAuthenticate(): VerifyFunction {
     return async (
       username: string,
       password: string,
@@ -77,6 +84,27 @@ export class Account extends Model {
         return done(error);
       }
     };
+  }
+
+  static serializeUser(account: Account, done: CallableFunction) {
+    const { username } = account;
+    done(null, username);
+  }
+
+  static async deserializeUser(username: string, done: CallableFunction) {
+    try {
+      const foundAccount = await this.findByUsername(username);
+
+      if (!foundAccount) {
+        return done(new Error('User not found'));
+      }
+    } catch (error) {
+      done(error);
+    }
+  }
+
+  static genStrategy() {
+    return new LocalStrategy(this.passportAuthenticate());
   }
 }
 
