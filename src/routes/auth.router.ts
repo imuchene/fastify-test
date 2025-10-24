@@ -75,24 +75,27 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/auth/signup',
     async (request: FastifyRequest<{ Body: Account }>, reply: FastifyReply) => {
-      const { username, hash, confirmPassword } = request.body;
-      if (hash != confirmPassword) {
+      const { username, password, confirmPassword } = request.body;
+      try {
+              if (password !== confirmPassword) {
         return reply.send({ message: 'Passwords do not match' });
       }
 
-      await Account.create({ username, hash });
+      await Account.register(username, password);
       return reply.send({ message: 'Account created' });
+      } catch (error) {
+        if (error && error instanceof Error) {
+          return reply.code(400).send({ message: 'Account creation failed', error: error.message })
+        }
+      }
     },
   );
 
-  fastify.post(
-    '/auth/login',
-    async (request: FastifyRequest<{ Body: Account }>, reply: FastifyReply) => {
-      const { username, hash } = request.body;
-      if (users[username] && users[username] == hash) {
-        return reply.send({ message: 'Logged in' });
-      }
-      return reply.redirect('/auth?page=login');
-    },
-  );
+  fastify.post('/auth/login', fastifyPassport.authenticate('local', {
+    successRedirect: '/',
+    successMessage: 'Logged in successfully',
+    failureRedirect: '/auth',
+    failureMessage: 'Login Failed. Wrong credentials',
+    failureFlash: true,
+  }))
 }

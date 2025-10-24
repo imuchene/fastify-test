@@ -6,6 +6,7 @@ import { Strategy as LocalStrategy, VerifyFunction } from 'passport-local';
 export class Account extends Model {
   declare username: string;
   declare hash: string;
+  declare password: string;
   declare confirmPassword: string;
   declare salt: string;
 
@@ -35,12 +36,6 @@ export class Account extends Model {
       const hashRaw = crypto.pbkdf2Sync(password, salt, 12000, 64, 'sha512');
       this.set('hash', Buffer.from(hashRaw).toString('hex'));
       this.set('salt', salt);
-
-      const test = crypto
-        .createHmac('sha256', 'testKey')
-        .update('testString')
-        .digest('hex');
-      console.log('test hex', test);
     } catch (error) {
       if (error && error instanceof Error) {
         throw new Error(error.message);
@@ -120,7 +115,7 @@ Account.init(
       allowNull: false,
       unique: true,
     },
-    password: {
+    hash: {
       type: DataTypes.STRING,
       allowNull: false,
     },
