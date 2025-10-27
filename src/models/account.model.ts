@@ -2,6 +2,11 @@ import { DataTypes, Model } from 'sequelize';
 import { db } from '../db/database.config';
 import crypto from 'node:crypto';
 import { Strategy as LocalStrategy, VerifyFunction } from 'passport-local';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { Strategy as JWTStrategy, ExtractJwt } from 'passport-jwt';
+import '@dotenvx/dotenvx/config';
+import { FastifyRequest } from 'fastify';
+import { CookieNames } from '../enums/cookie-names.enum';
 
 export class Account extends Model {
   declare username: string;
@@ -98,8 +103,43 @@ export class Account extends Model {
     }
   }
 
-  static genStrategy() {
+  static genLocalStrategy() {
     return new LocalStrategy(this.passportAuthenticate());
+  }
+
+  static genJWTStrategy() {
+    return new JWTStrategy(
+      {
+        secretOrKey: String(process.env.JWT_SECRET),
+        ignoreExpiration: false,
+        jwtFromRequest: ExtractJwt.fromExtractors([
+          (request: FastifyRequest) => {
+            const data = String(request?.cookies[CookieNames.AuthCookie]);
+
+            if (!data) {
+              return null;
+            }
+
+            return data;
+          },
+        ]),
+      },
+      async (jwtPayload: JwtPayload, done: CallableFunction) => {
+        try {
+          const account = await this.findByUsername(jwtPayload.username);
+          if (account) {
+            return done(null, account);
+          }
+          return done(null, false, { message: 'User not found' });
+        } catch (error) {
+          return done(error);
+        }
+      },
+    );
+  }
+
+  static signJWT(username: string) {
+    return jwt.sign({ username }, String(process.env.JWT_SECRET));
   }
 }
 
@@ -138,4 +178,4 @@ Account.beforeCreate((account) => {
   account.username = account.username.toLowerCase();
 });
 
-Account.sync({ alter: true });
+Account.sync();

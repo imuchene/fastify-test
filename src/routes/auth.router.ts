@@ -8,8 +8,7 @@ import fastifyCookie from '@fastify/cookie';
 import fastifySession from '@fastify/session';
 import fastifyPassport from '@fastify/passport';
 import '@dotenvx/dotenvx/config';
-
-const users: any = {};
+import { CookieNames } from '../enums/cookie-names.enum';
 
 export async function authRoutes(fastify: FastifyInstance) {
   await fastify.register(fastifyCookie);
@@ -41,7 +40,9 @@ export async function authRoutes(fastify: FastifyInstance) {
     },
   );
 
-  fastifyPassport.use('local', Account.genStrategy());
+  fastifyPassport.use('local', Account.genLocalStrategy());
+
+  fastifyPassport.use('jwt', Account.genJWTStrategy());
 
   const loginFormVars: LoginFormVariables = {
     signup: {
@@ -72,30 +73,79 @@ export async function authRoutes(fastify: FastifyInstance) {
     },
   );
 
+  fastify.get(
+    '/dashboard',
+    async (
+      request: FastifyRequest<{ Querystring: AuthQueryString }>,
+      reply: any,
+    ) => {
+      const { page } = request.query;
+      const formVars = loginFormVars[page] || loginFormVars.signup;
+      return reply.hbsView('/views/authentication/index.hbs', formVars);
+    },
+  );
+
   fastify.post(
     '/auth/signup',
     async (request: FastifyRequest<{ Body: Account }>, reply: FastifyReply) => {
       const { username, password, confirmPassword } = request.body;
       try {
-              if (password !== confirmPassword) {
-        return reply.send({ message: 'Passwords do not match' });
-      }
+        if (password !== confirmPassword) {
+          return reply.send({ message: 'Passwords do not match' });
+        }
 
-      await Account.register(username, password);
-      return reply.send({ message: 'Account created' });
+        await Account.register(username, password);
+        return reply.send({ message: 'Account created' });
       } catch (error) {
         if (error && error instanceof Error) {
-          return reply.code(400).send({ message: 'Account creation failed', error: error.message })
+          return reply
+            .code(400)
+            .send({ message: 'Account creation failed', error: error.message });
         }
       }
     },
   );
 
-  fastify.post('/auth/login', fastifyPassport.authenticate('local', {
-    successRedirect: '/',
-    successMessage: 'Logged in successfully',
-    failureRedirect: '/auth',
-    failureMessage: 'Login Failed. Wrong credentials',
-    failureFlash: true,
-  }))
+  fastify.post(
+    '/auth/login',
+    {
+      preValidation: fastifyPassport.authenticate('local', { session: false }),
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      if (request.user) {
+        const user: any = request.user;
+        const account: Account = user.dataValues;
+
+        const token = Account.signJWT(account.username);
+
+        return reply
+          .setCookie(CookieNames.AuthCookie, token, {
+            httpOnly: true,
+            sameSite: 'lax',
+          })
+          .send({ message: 'Logged in successfully ' });
+      }
+    },
+  );
+
+  // The route below when visited tests that authentication works
+  fastify.get(
+    '/auth/test',
+    { preValidation: fastifyPassport.authenticate('jwt', { session: false }) },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return reply.send({ status: 'Authenticated ' });
+    },
+  );
+
+  fastify.get(
+    '/auth/logout',
+    { preValidation: fastifyPassport.authenticate('jwt', { session: false }) },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      // To logout, set the max age of the cookie to 0, meaning expire it immediately, and set its contents
+      // to an empty string
+      return reply
+        .setCookie(CookieNames.AuthCookie, '', { maxAge: 0 })
+        .send({ message: 'Logged out successfully' });
+    },
+  );
 }

@@ -44,4 +44,4 @@ Lead.init(
   },
 );
 
-Lead.sync({ alter: true });
+Lead.sync();
