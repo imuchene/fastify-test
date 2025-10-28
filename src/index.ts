@@ -12,6 +12,7 @@ import { routes } from './routes/router';
 import { restaurantRoutes } from './routes/restaurant.router';
 import { emailRoutes } from './routes/email.router';
 import { authRoutes } from './routes/auth.router';
+import { orderRoutes } from './routes/order.router';
 
 const app = fastify();
 
@@ -82,5 +83,6 @@ app.get('/ping', async () => {
 app.register(restaurantRoutes);
 app.register(emailRoutes);
 app.register(authRoutes);
+app.register(orderRoutes);
 
 app.register(routes, { prefix: 'api' });
