@@ -1,30 +1,65 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { Order } from '../interfaces/order.interface';
 import Queue from 'queue';
+import { createClient, RedisClientOptions } from 'redis';
+import '@dotenvx/dotenvx/config';
+import amqplib from 'amqplib';
+
+let channel: amqplib.Channel
+let connection: amqplib.ChannelModel
+
+async function connect(){
+  try {
+    connection = await amqplib.connect(String(process.env.RABBITMQ_URL));
+    channel = await connection.createChannel();
+    await channel.assertQueue('drink-order');
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function sendOrderData(data: any){
+  channel.sendToQueue('drink-order', Buffer.from(JSON.stringify(data)))
+}
 
 export async function orderRoutes(fastify: FastifyInstance) {
   const coffeeQueue = new Queue({ results: [] });
 
-  fastify.post(
-    '/slow_orders',
-    async (request: FastifyRequest<{ Body: Order }>, reply: FastifyReply) => {
-      const { drinkOrder } = request.body;
-      for (let i = 0; i < 10000000000; i++) {}
-      console.log('Order placed');
-      return reply.send(`Drink order added to queue: ${drinkOrder}`);
+  const redisOptions: RedisClientOptions = {
+    username: String(process.env.REDIS_USERNAME),
+    password: String(process.env.REDIS_PASSWORD),
+    database: Number(process.env.REDIS_DATABASE),
+    socket: {
+      host: process.env.REDIS_HOST,
+      port: Number(process.env.REDIS_PORT),
     },
-  );
+  };
+
+  const subscriber = createClient(redisOptions);
+  await subscriber.connect();
+
+  const publisher = createClient(redisOptions);
+  await publisher.connect();
+
+  await subscriber.subscribe('drink-order', (drinkOrder) => {
+    console.log(`Received a new ${drinkOrder} order`);
+  });
 
   fastify.post(
     '/orders',
     async (request: FastifyRequest<{ Body: Order }>, reply: FastifyReply) => {
       const { drinkOrder } = request.body;
+
+      publisher.publish('drink-order', drinkOrder);
+
       coffeeQueue.push(() => {
         return new Promise((resolve, reject) => {
           resolve(drinkOrder);
         });
       });
+
       console.log('coffee queue length', coffeeQueue.length);
+
       return reply.send('Drink order added to the queue');
     },
   );
