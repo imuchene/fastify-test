@@ -9,6 +9,7 @@ export class AnalyticsService {
 
   constructor() {
     this.connect();
+    this.processDrinkAnalytics();
   }
 
   async connect() {
@@ -32,5 +33,32 @@ export class AnalyticsService {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async processDrinkAnalytics() {
+    const FIVE_MINUTES_IN_MILLISECONDS = 5 * 60 * 1000;
+    const TEN_SECONDS_IN_MILLISECONDS = 10 * 1000;
+
+    setInterval(() => {
+      const drinkNames = Object.keys(this.drinkMap);
+
+      const totalDrinkCount = drinkNames.reduce((total, drinkName) => {
+        return total + this.drinkMap[drinkName];
+      }, 0);
+
+      const drinkPercentages = drinkNames.map((drinkName) => {
+        const percentage =
+          Math.floor((this.drinkMap[drinkName] / totalDrinkCount) * 100) || 0;
+        return `${drinkName}: ${percentage}%`;
+      });
+
+      console.log(`Drink orders: ${drinkPercentages}`);
+
+      setTimeout(() => {
+        drinkNames.forEach((drinkName) => {
+          this.drinkMap[drinkName] = 0;
+        });
+      }, FIVE_MINUTES_IN_MILLISECONDS);
+    }, TEN_SECONDS_IN_MILLISECONDS);
   }
 }

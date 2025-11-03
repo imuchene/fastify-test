@@ -30,7 +30,6 @@ export class FulfilmentService {
   }
 
   async sendOrderData(data: any) {
-    await this.connect();
     this.channel.sendToQueue('analytics', Buffer.from(JSON.stringify(data)));
   }
 }

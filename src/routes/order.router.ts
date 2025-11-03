@@ -51,7 +51,7 @@ export async function orderRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/orders',
     async (request: FastifyRequest<{ Body: Order }>, reply: FastifyReply) => {
-      const { drinkOrder: order, customer } = request.body;
+      const { drinkOrder: order, cost, customer } = request.body;
       const data = {
         order,
         customer,
