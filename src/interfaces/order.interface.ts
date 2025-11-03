@@ -1,3 +1,7 @@
 export interface Order {
-  drinkOrder: string;
+  drinkOrder: {
+    order: string;
+  };
+  cost: number;
+  customer: string;
 }

@@ -4,11 +4,13 @@ import Queue from 'queue';
 import { createClient, RedisClientOptions } from 'redis';
 import '@dotenvx/dotenvx/config';
 import amqplib from 'amqplib';
+import { FulfilmentService } from '../services/fulfilment.service';
+import { AnalyticsService } from '../services/analytics.service';
 
-let channel: amqplib.Channel
-let connection: amqplib.ChannelModel
+let channel: amqplib.Channel;
+let connection: amqplib.ChannelModel;
 
-async function connect(){
+async function connect() {
   try {
     connection = await amqplib.connect(String(process.env.RABBITMQ_URL));
     channel = await connection.createChannel();
@@ -18,8 +20,9 @@ async function connect(){
   }
 }
 
-async function sendOrderData(data: any){
-  channel.sendToQueue('drink-order', Buffer.from(JSON.stringify(data)))
+async function sendOrderData(data: any) {
+  await connect();
+  channel.sendToQueue('drink-order', Buffer.from(JSON.stringify(data)));
 }
 
 export async function orderRoutes(fastify: FastifyInstance) {
@@ -48,19 +51,19 @@ export async function orderRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/orders',
     async (request: FastifyRequest<{ Body: Order }>, reply: FastifyReply) => {
-      const { drinkOrder } = request.body;
+      const { drinkOrder: order, customer } = request.body;
+      const data = {
+        order,
+        customer,
+      };
 
-      publisher.publish('drink-order', drinkOrder);
+      await sendOrderData(data);
+      new FulfilmentService();
+      new AnalyticsService();
 
-      coffeeQueue.push(() => {
-        return new Promise((resolve, reject) => {
-          resolve(drinkOrder);
-        });
-      });
+      console.log(`Drink: ${order} is being processed for ${customer}`);
 
-      console.log('coffee queue length', coffeeQueue.length);
-
-      return reply.send('Drink order added to the queue');
+      return reply.send('Order Processing');
     },
   );
 
