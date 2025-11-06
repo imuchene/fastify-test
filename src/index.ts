@@ -13,6 +13,7 @@ import { restaurantRoutes } from './routes/restaurant.router';
 import { emailRoutes } from './routes/email.router';
 import { authRoutes } from './routes/auth.router';
 import { orderRoutes } from './routes/order.router';
+import { blockchainRoutes } from './routes/blockchain.router';
 
 const app = fastify();
 
@@ -84,5 +85,6 @@ app.register(restaurantRoutes);
 app.register(emailRoutes);
 app.register(authRoutes);
 app.register(orderRoutes);
+app.register(blockchainRoutes);
 
 app.register(routes, { prefix: 'api' });
