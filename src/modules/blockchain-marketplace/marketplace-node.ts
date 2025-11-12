@@ -96,4 +96,12 @@ export class MarketplaceNode {
     this.balance += price;
     return 'Mining complete';
   }
+
+  availableSongs() {
+    // return Object.values(this.songs).filter((transaction: any) => transaction.transactionType === TransactionTypes.Sell).map(({ id, songTitle, price }) => [id, songTitle, price]);
+    return Object.values(this.songs).filter(
+      (transaction: any) =>
+        transaction.transactionType === TransactionTypes.Sell,
+    );
+  }
 }

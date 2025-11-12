@@ -15,6 +15,8 @@ function initializeNode() {
   marketplaceNode = new MarketplaceNode(URL, initialPeers, blockchain);
 }
 
+initializeNode();
+
 export async function blockchainRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/register_node',
@@ -114,6 +116,13 @@ export async function blockchainRoutes(fastify: FastifyInstance) {
       });
 
       reply.send({ message: result });
+    },
+  );
+
+  fastify.get(
+    '/songs',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      reply.send({ songs: marketplaceNode.availableSongs() });
     },
   );
 }
