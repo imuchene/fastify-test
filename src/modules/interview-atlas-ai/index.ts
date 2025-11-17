@@ -3,7 +3,9 @@ import '@dotenvx/dotenvx/config';
 
 const ai = new GoogleGenAI({});
 
-async function main(prompt: string) {
+export async function generateResponse(
+  prompt: string,
+): Promise<string | undefined> {
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-lite',
     contents: [
@@ -22,8 +24,5 @@ async function main(prompt: string) {
       },
     ],
   });
-
-  console.log('AI response', response.text);
+  return response.text;
 }
-
-main('In one sentence, explain recursion');
