@@ -1,12 +1,14 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { InterviewData } from '../interfaces/interview.interface';
+import { GeminiPromptInterface } from '../interfaces/learning-profile.interface';
 import { generateResponse } from '../modules/interview-atlas-ai';
+import fastifyPassport from '@fastify/passport';
 
 export async function interviewRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/query',
+    { preValidation: fastifyPassport.authenticate('jwt', { session: false }) },
     async (
-      request: FastifyRequest<{ Body: InterviewData }>,
+      request: FastifyRequest<{ Body: GeminiPromptInterface }>,
       reply: FastifyReply,
     ) => {
       try {
@@ -20,12 +22,10 @@ export async function interviewRoutes(fastify: FastifyInstance) {
       } catch (error) {
         console.error('Gemini API error', error);
         if (error instanceof Error) {
-          reply
-            .status(500)
-            .send({
-              error: 'Error communicating with the Gemini API',
-              details: error.message,
-            });
+          reply.status(500).send({
+            error: 'Error communicating with the Gemini API',
+            details: error.message,
+          });
         }
       }
     },

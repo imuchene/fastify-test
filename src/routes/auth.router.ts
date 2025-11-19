@@ -4,46 +4,11 @@ import {
   LoginFormVariables,
 } from '../interfaces/auth-variables.interface';
 import { Account } from '../models/account.model';
-import fastifyCookie from '@fastify/cookie';
-import fastifySession from '@fastify/session';
 import fastifyPassport from '@fastify/passport';
 import '@dotenvx/dotenvx/config';
 import { CookieNames } from '../enums/cookie-names.enum';
 
 export async function authRoutes(fastify: FastifyInstance) {
-  await fastify.register(fastifyCookie);
-
-  await fastify.register(fastifySession, {
-    secret: String(process.env.SESSION_SECRET),
-    cookie: {
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24,
-    },
-    saveUninitialized: false,
-  });
-
-  await fastify.register(fastifyPassport.initialize());
-
-  await fastify.register(fastifyPassport.secureSession());
-
-  fastifyPassport.registerUserSerializer(
-    async (user: Account, request: FastifyRequest) => user.username,
-  );
-
-  fastifyPassport.registerUserDeserializer(
-    async (username: string, request: FastifyRequest) => {
-      const account = await Account.findByUsername(username);
-      if (!account) {
-        throw new Error('User not found');
-      }
-      return account;
-    },
-  );
-
-  fastifyPassport.use('local', Account.genLocalStrategy());
-
-  fastifyPassport.use('jwt', Account.genJWTStrategy());
-
   const loginFormVars: LoginFormVariables = {
     signup: {
       title: 'Sign up',
@@ -137,7 +102,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     },
   );
 
-  fastify.get(
+  fastify.delete(
     '/auth/logout',
     { preValidation: fastifyPassport.authenticate('jwt', { session: false }) },
     async (request: FastifyRequest, reply: FastifyReply) => {

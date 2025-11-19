@@ -8,6 +8,9 @@ import fastifyStatic from '@fastify/static';
 import fastifyFormbody from '@fastify/formbody';
 import handlebars from 'handlebars';
 import { schedule } from './services/scheduler';
+import fastifyCookie from '@fastify/cookie';
+import fastifySession from '@fastify/session';
+import fastifyPassport from '@fastify/passport';
 import { routes } from './routes/router';
 import { restaurantRoutes } from './routes/restaurant.router';
 import { emailRoutes } from './routes/email.router';
@@ -15,6 +18,7 @@ import { authRoutes } from './routes/auth.router';
 import { orderRoutes } from './routes/order.router';
 import { blockchainRoutes } from './routes/blockchain.router';
 import { interviewRoutes } from './routes/interview.router';
+import { Account } from './models/account.model';
 
 const app = fastify();
 
@@ -69,6 +73,39 @@ app.register(fastifyStatic, {
   prefix: '/simpledotcss/',
   decorateReply: false,
 });
+
+app.register(fastifyCookie);
+
+app.register(fastifySession, {
+  secret: String(process.env.SESSION_SECRET),
+  cookie: {
+    secure: false,
+    maxAge: 1000 * 60 * 60 * 24,
+  },
+  saveUninitialized: false,
+});
+
+app.register(fastifyPassport.initialize());
+
+app.register(fastifyPassport.secureSession());
+
+fastifyPassport.registerUserSerializer(
+  async (user: Account, request: FastifyRequest) => user.username,
+);
+
+fastifyPassport.registerUserDeserializer(
+  async (username: string, request: FastifyRequest) => {
+    const account = await Account.findByUsername(username);
+    if (!account) {
+      throw new Error('User not found');
+    }
+    return account;
+  },
+);
+
+fastifyPassport.use('local', Account.genLocalStrategy());
+
+fastifyPassport.use('jwt', Account.genJWTStrategy());
 
 // Root route
 app.get('/', async (request: FastifyRequest, reply: any) => {

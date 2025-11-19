@@ -1,14 +1,14 @@
 import { DataTypes, Model } from 'sequelize';
 import { db } from '../db/database.config';
 
-export class User extends Model {
+export class LearningProfile extends Model {
   declare id: number;
   declare user_id: string;
   declare password: string;
   declare learning_profile: string;
 }
 
-User.init(
+LearningProfile.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -30,12 +30,12 @@ User.init(
   },
   {
     sequelize: db,
-    modelName: 'User',
-    tableName: 'users',
+    modelName: 'LearningProfile',
+    tableName: 'learning_profiles',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   },
 );
 
-User.sync();
+LearningProfile.sync();
