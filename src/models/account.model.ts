@@ -9,6 +9,7 @@ import { FastifyRequest } from 'fastify';
 import { CookieNames } from '../enums/cookie-names.enum';
 
 export class Account extends Model {
+  declare id: number;
   declare username: string;
   declare hash: string;
   declare password: string;

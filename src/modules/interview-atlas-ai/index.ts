@@ -1,6 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
 import '@dotenvx/dotenvx/config';
-import { GeminiPromptInterface } from '../../interfaces/learning-profile.interface';
 
 const ai = new GoogleGenAI({});
 
@@ -30,7 +29,7 @@ export async function generateResponse(
 
 export async function generateResponseWithSummary(
   prompt: string,
-  learningProfile: GeminiPromptInterface,
+  learningProfile: string,
 ) {
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-lite',
