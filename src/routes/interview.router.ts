@@ -6,7 +6,6 @@ import { Account } from '../models/account.model';
 import { LearningProfile } from '../models/learning-profile.model';
 
 export async function interviewRoutes(fastify: FastifyInstance) {
-
   fastify.post(
     '/query',
     { preValidation: fastifyPassport.authenticate('jwt', { session: false }) },
@@ -29,7 +28,6 @@ export async function interviewRoutes(fastify: FastifyInstance) {
         });
 
         if (accountLearningProfile) {
-
           const learningProfile =
             accountLearningProfile.learning_profile ||
             'This user has no recorded learning profile yet';
@@ -38,8 +36,6 @@ export async function interviewRoutes(fastify: FastifyInstance) {
             prompt,
             learningProfile,
           );
-
-          // accountLearningProfile.update('learning_profile', updatedProfileSummary, { where: { id: accountLearningProfile.id}});
 
           reply.send({ answer });
         }
